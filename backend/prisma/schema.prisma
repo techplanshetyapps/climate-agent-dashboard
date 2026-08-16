@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("postgres://f68f5197e430fa65bab61ad99c8ff29cecce76f9b499855129ef6a157aa15538:sk_8wYBqISSdLADps73NNCL9@pooled.db.prisma.io:5432/postgres?sslmode=require")
+}
+
+model Emission {
+  id        Int    @id @default(autoincrement())
+  entity    String // e.g., Country or Region
+  year      Int
+  co2       Float
+  dataset   String // HF Dataset origin (e.g., Asia or Europe)
+  
+  @@unique([entity, year, dataset])
+}
+
+// LLM Agent Memory Persistence
+model ChatSession {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  messages  Message[]
+}
+
+model Message {
+  id        Int         @id @default(autoincrement())
+  sessionId String
+  role      String      // 'user', 'assistant', 'system'
+  content   String
+  createdAt DateTime    @default(now())
+  session   ChatSession @relation(fields: [sessionId], references: [id])
+}
